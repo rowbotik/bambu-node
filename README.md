@@ -1,8 +1,7 @@
 # Bambu Node
 
 > [!CAUTION]  
-> 🚧 This library is looking for new maintainer(s)! Please message me `@simplemark` on
-> Discord if you'd like to pick this up.
+> 🚧 This library is looking for new maintainer(s)! Please open a new issue if you'd like to pick this up.
 
 A node.js library for connecting to and receiving data from Bambu Lab printers through
 their MQTT servers.
