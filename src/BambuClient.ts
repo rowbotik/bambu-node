@@ -428,6 +428,10 @@ export class BambuClient extends events.EventEmitter<keyof BambuClientEvents> {
 				else if (otaModule.sn.startsWith("030")) this._printerData.model = PrinterModel.A1
 				else if (otaModule.sn.startsWith("039"))
 					this._printerData.model = PrinterModel.A1M
+				else if (otaModule.sn.startsWith("093"))
+					this._printerData.model = PrinterModel.H2S
+				else if (otaModule.sn.startsWith("094"))
+					this._printerData.model = PrinterModel.H2D
 				else throw new Error("Printer model not supported!")
 
 				this.emit("printer:dataUpdate", this._printerData, {

@@ -34,6 +34,8 @@ export enum PrinterModel {
 	P1S = "P1S",
 	A1 = "A1",
 	A1M = "A1M",
+	H2D = "H2D",
+	H2S = "H2S",
 }
 
 export interface IncomingMessageData {

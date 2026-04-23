@@ -1,7 +1,7 @@
 {
-	"name": "bambu-node",
+	"name": "@rowbotik/bambu-node",
 	"version": "3.22.21",
-	"description": "A node.js library for connecting to and receiving data from Bambu Lab printers through their MQTT servers.",
+	"description": "A node.js library for connecting to and receiving data from Bambu Lab printers through their MQTT servers. Fork with H2S/H2D support.",
 	"main": "./dist/index.js",
 	"module": "./dist/index.js",
 	"types": "./dist/index.d.ts",
@@ -11,12 +11,12 @@
 	"type": "module",
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/THE-SIMPLE-MARK/bambu-node.git"
+		"url": "git+https://github.com/rowbotik/bambu-node.git"
 	},
 	"bugs": {
-		"url": "https://github.com/THE-SIMPLE-MARK/bambu-node/issues"
+		"url": "https://github.com/rowbotik/bambu-node/issues"
 	},
-	"homepage": "https://github.com/THE-SIMPLE-MARK/bambu-node#readme",
+	"homepage": "https://github.com/rowbotik/bambu-node#readme",
 	"keywords": [
 		"bambu",
 		"bambulab",
