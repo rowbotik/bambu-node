@@ -1,218 +1,66 @@
-# Bambu Node
+# @rowbotik/bambu-node
 
-> [!CAUTION]  
-> 🚧 This library is looking for new maintainer(s)! Please open a new issue if you'd like
-> to pick this up.
+A fork of [THE-SIMPLE-MARK/bambu-node](https://github.com/THE-SIMPLE-MARK/bambu-node) with added support for **Bambu Lab H2S and H2D** printers.
 
-A node.js library for connecting to and receiving data from Bambu Lab printers through
-their MQTT servers.
+## What's different
 
-- Every command & response field is documented & typed.
-- Easily (and safely\*) construct commands & manage responses.
-- Full async support! `client#executeCommand` waits until the command completion is
-  verified by the printer.
+The upstream library only recognises X1C, X1, X1E, P1P, P1S, A1, and A1M. H2S and H2D firmware never responds to the `get_version` round-trip the library uses for model detection, so connecting to either printer threw `"Printer model not supported!"`.
 
-## Getting Started
+This fork adds:
 
-### Prerequisites
+| Serial prefix | Model |
+|---|---|
+| `093` | H2S |
+| `094` | H2D |
 
-Make sure you have the following installed:
+Both are now present in the `PrinterModel` enum and are detected from the OTA module serial number like every other model.
 
-- Node.js
-- NPM
-- TypeScript
-
-> [!CAUTION]  
-> TypeScript is highly recommended for this package due to the type safety it provides.
-> This is especially important in use cases like this project where the library
-> communicates with external hardware which can very well come with property damage. And
-> even with TypeScript, I am not liable for any such damages as stated in the
-> [license](LICENSE).
-
-### Installation
+## Installation
 
 ```bash
-npm install bambu-node
+npm install @rowbotik/bambu-node
 ```
 
-### Example Usage
+If you're already using `bambu-node` and want to swap without changing any imports:
+
+```bash
+npm install bambu-node@npm:@rowbotik/bambu-node
+```
+
+## Usage
+
+Identical to the upstream package — see the [original README](https://github.com/THE-SIMPLE-MARK/bambu-node) for full API documentation.
 
 ```typescript
-import { BambuClient, Fan, UpdateFanCommand } from "bambu-node"
+import { BambuClient, PrinterModel } from "@rowbotik/bambu-node"
 
-// define a printer connection
 const client = new BambuClient({
-	host: "your_printers_ip",
-	accessToken: "your_printers_access_token",
-	serialNumber: "your_printers_sn",
+    host: "192.168.1.x",
+    accessToken: "your_access_token",
+    serialNumber: "093...",   // H2S
 })
 
-// more about the available events below
-client.on("message", (topic, key, data) => {
-	console.log(`New ${key} message!`, data)
-})
-
-client.on("printer:statusUpdate", (oldStatus, newStatus) => {
-	console.log(`The printer's status has changed from ${oldStatus} to ${newStatus}!`)
-})
-
-// connect to the printer
 await client.connect()
-
-// update the speed of the auxiliary fan to 100%
-await client.executeCommand(new UpdateFanCommand({ fan: Fan.AUXILIARY_FAN, speed: 100 }))
-
-// we don't want to do anything else => we close the connection
-// (can be kept open indefinitely if needed)
-await client.disconnect()
+// client.data.model === PrinterModel.H2S
 ```
 
-## API
+## Supported models
 
-#### Legend
-
-<u>Unnamed things inside classes</u>: Other classes that extend that class.
-
-Every method, command and response is documented in JSDoc, so only events & utility
-classes are documented here.
-
-- Bambu Node
-  - [Class: `BambuClient`](#class-bambuclient)
-    - Method: `BambuClient.connect()`
-    - Method: `BambuClient.disconnect()`
-    - Method: `BambuClient.subscribe(topic)`
-    - Method: `BambuClient.executeCommand(command)`
-    - [Event: `message`](#message)
-    - [Event: `rawMessage`](#rawmessage)
-    - [Event: `client:connect`](#clientconnect)
-    - [Event: `client:disconnect`](#clientdisconnect)
-    - [Event: `printer:dataUpdate`](#printerdataupdate)
-    - [Event: `printer:statusUpdate`](#printerstatusupdate)
-    - [Event: `job:update`](#jobupdate)
-    - [Event: `job:start`](#jobstart)
-    - [Event: `job:pause`](#jobpause)
-    - [Event: `job:offlineRecovery`](#jobofflineRecovery)
-    - [Event: `job:unpause`](#jobunpause)
-    - [Event: `job:finish`](#jobfinish)
-  - [Class: `Job`](#class-job)
-    - Method: `Job.update(data)`
-    - Getter: `Job.data`
-  - Class: `AbstractCommand`
-    - Class: `GCodeCommand`
-      - `GCodeFileCommand`
-      - `GCodeLineCommand`
-    - `GetVersionCommand`
-    - `PushAllCommand`
-    - `UpdateFanCommand`
-    - `UpdateLightCommand`
-    - `UpdateSpeedCommand`
-    - `UpdateStateCommand`
-    - `UpdateTempCommand`
-  - _Command Responses_
-    - info
-      - Class: `InfoMessageCommand`
-        - `GetVersionResponse`
-    - mcPrint
-      - Class: `McPrintMessageCommand`
-        - `PushInfoResponse`
-    - print
-      - Class: `PrintMessageCommand`
-        - `GCodeFileResponse`
-        - `GCodeLineResponse`
-        - `ProjectFileResponse`
-        - `PushAllResponse`
-          - `PushStatusResponse`
-        - `UpdateFanResponse`
-        - `UpdateLightResponse`
-        - `UpdateSpeedResponse`
-        - `UpdateStateResponse`
-        - `UpdateTempResponse`
-
-### Class: BambuClient
-
-Responsible for managing the connection and messages to/from the printer.
-
-#### Events
-
-##### `rawMessage`
-
-Triggered whenever a new message is received from the MQTT broker.
-
-#### `message`
-
-Triggered whenever a new <u>known</u> message is received from the MQTT broker. It's
-already parsed and sent using its type.
-
-#### `client:connect`
-
-Triggered whenever the client connects to the printer. This will also trigger on a
-reconnect.
-
-#### `client:disconnect`
-
-Triggered whenever the client disconnects from the printer. This can be on purpose using
-the `client#disconnect` method or when the printer itself goes offline.
-
-#### `client:error`
-
-Triggered whenever the internal MQTT client encounters an error.
-
-Examples include:
-
-- Unresolvable host provided
-- Incorrect credentials provided
-- Unexpected responses
-
-#### `printer:dataUpdate`
-
-Triggered whenever new data is received from the printer and is merged into the data class
-field.
-
-#### `printer:statusUpdate`
-
-Triggered whenever the printer's status changes to a new status.
-
-#### `job:update`
-
-Triggered whenever the current Job's data gets updated.
-
-#### `job:start`
-
-Triggered whenever a new printing job starts.
-
-#### `job:pause`
-
-Triggered whenever the current print job is paused.
-
-#### `job:offlineRecovery`
-
-Triggered whenever the current print job was recovered after the printer came back online
-from an offline state.
-
-#### `job:unpause`
-
-Triggered whenever the current print job is resumed.
-
-#### `job:finish`
-
-Triggered whenever the current print job finishes.
-
-Possible reasons:
-
-- `SUCCESS`: Triggered whenever the current print job finishes without errors.
-- `FAILED`: Triggered whenever the current print job finishes without errors.
-- `UNEXPECTED`: Triggered whenever the current print job finishes unexpectedly. This is
-  only included as a proof of concept and is 99% bound to never happen.
-
-### Class: Job
-
-Responsible for managing the data about the current print job. It collects historical
-data, error codes, etc. It is included in every event starting with `job:`.
+| Model | Serial prefix | Notes |
+|---|---|---|
+| X1C | `00M` | |
+| X1 | `00W` | |
+| X1E | `03W` | |
+| P1P | `01S` | |
+| P1S | `01P` | |
+| A1 | `030` | |
+| A1 Mini | `039` | |
+| H2S | `093` | Added in this fork |
+| H2D | `094` | Added in this fork |
 
 ## Contributing
 
-Pull requests are welcome. For major changes, please open an issue first to discuss what
-you would like to change.
+PRs welcome. If the upstream project gains H2S/H2D support this fork will become redundant — raise an issue or PR there first.
 
 ## License
 
